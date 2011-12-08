@@ -17,6 +17,24 @@ struct command_args {
   char **argv;
 };
 
+static void command_args_free (struct command_args *args) {
+  int i;
+  if (args != NULL) {
+    args->cb.Dispose();
+
+    for (i = 0; i < args->argc; i++) {
+      if (args->argv[i] != NULL) {
+        free(args->argv[i]);
+        args->argv[i] = NULL;
+      }
+    }
+
+    delete args->argv;
+
+    free(args);
+  }
+}
+
 static int DoSyncCall(eio_req *req) {
   struct command_args *args = (struct command_args *)req->data;
   args->result = MagickCommandGenesis(AcquireImageInfo(), args->cmd, args->argc,
@@ -41,9 +59,8 @@ static int DoSyncCall_After(eio_req *req) {
     FatalException(try_catch);
   }
 
-  args->cb.Dispose();
+  command_args_free(args);
 
-  free(args);
   return 0;
 }
 
