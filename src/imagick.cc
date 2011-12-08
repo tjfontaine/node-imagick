@@ -24,7 +24,7 @@ static Handle<Value> dispatch(const Arguments& args, MagickCommand cmd) {
   }
 
   MagickBooleanType r = MagickCommandGenesis(AcquireImageInfo(), cmd, argc, argv, NULL, AcquireExceptionInfo());
-  return Boolean::New(r == MagickTrue ? 1 : 0);
+  return Boolean::New(r);
 }
 
 static Handle<Value> Mogrify(const Arguments& args) {
