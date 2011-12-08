@@ -1,0 +1,8 @@
+{
+  "name": "imagick",
+  "version": "0.0.1",
+  "main": "imagick",
+  "description": "Native bindings to ImageMagick",
+  "keywords": ["ImageMagick", "png", "jpeg", "image"],
+  "author": "Timothy J Fontaine <tjfontaine@gmail.com>"
+}

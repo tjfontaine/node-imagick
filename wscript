@@ -20,3 +20,10 @@ def build(bld):
   obj.target = "imagick"
   obj.source = "src/imagick.cc"
   obj.uselib = ['MAGICKWAND']
+
+def shutdown():
+  if Options.commands['clean']:
+    if exists('imagick.node'): unlink('imagick.node')
+  else:
+    if exists('build/default/imagick.node') and not exists('imagick.node'):
+      symlink('build/default/imagick.node', 'imagick.node')
