@@ -1,6 +1,6 @@
 {
   "name": "imagick",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "imagick",
   "description": "Native bindings to ImageMagick",
   "keywords": ["ImageMagick", "png", "jpeg", "image"],

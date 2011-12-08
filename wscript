@@ -2,7 +2,7 @@ import Options
 from os import unlink, symlink, popen
 from os.path import exists 
 
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 
 def set_options(opt):
   opt.tool_options("compiler_cxx")
