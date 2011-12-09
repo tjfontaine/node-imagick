@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <pthread.h>
+
 #include <wand/MagickWand.h>
 
 using namespace v8;
@@ -35,10 +37,25 @@ static void command_args_free (struct command_args *args) {
   }
 }
 
-static int DoSyncCall(eio_req *req) {
-  struct command_args *args = (struct command_args *)req->data;
+static void *inner_thread (void *data) {
+  struct command_args *args = (struct command_args *)data;
   args->result = MagickCommandGenesis(AcquireImageInfo(), args->cmd, args->argc,
                                       args->argv, NULL, AcquireExceptionInfo());
+
+  return NULL;
+}
+
+static int DoSyncCall(eio_req *req) {
+  void *res;
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  pthread_attr_setstacksize(&attr, 8192);
+
+  pthread_t thread;
+
+  pthread_create(&thread, &attr, &inner_thread, req->data);
+  pthread_join(thread, &res);
+
   return 0;
 }
 
@@ -47,13 +64,12 @@ static int DoSyncCall_After(eio_req *req) {
   ev_unref(EV_DEFAULT_UC);
   struct command_args *args = (struct command_args *)req->data;
 
-  Local<Value> argv[2];
-  argv[0] = Local<Value>::New(Null());
-  argv[1] = Integer::New(args->result);
+  Local<Value> argv[1];
+  argv[0] = Integer::New(args->result);
 
   TryCatch try_catch;
 
-  args->cb->Call(Context::GetCurrent()->Global(), 2, argv);
+  args->cb->Call(Context::GetCurrent()->Global(), 1, argv);
 
   if(try_catch.HasCaught()) {
     FatalException(try_catch);
