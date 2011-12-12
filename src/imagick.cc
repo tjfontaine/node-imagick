@@ -124,10 +124,21 @@ static Handle<Value> Convert(const Arguments& args) {
   return dispatch(args, ConvertImageCommand);
 }
 
+static Handle<Value> Composite(const Arguments& args) {
+  HandleScope scope;
+  return dispatch(args, CompositeImageCommand);
+}
+
 extern "C" void
 init (Handle<Object> target)
 {
   HandleScope scope;
   NODE_SET_METHOD(target, "Mogrify", Mogrify);
   NODE_SET_METHOD(target, "Convert", Convert);
+  NODE_SET_METHOD(target, "Composite", Convert);
+  
+  NODE_SET_METHOD(target, "mogrify", Mogrify);
+  NODE_SET_METHOD(target, "convert", Convert);
+  NODE_SET_METHOD(target, "composite", Convert);
+  
 }
