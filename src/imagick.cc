@@ -39,9 +39,14 @@ static void command_args_free (struct command_args *args) {
 
 static void *inner_thread (void *data) {
   struct command_args *args = (struct command_args *)data;
-  args->result = MagickCommandGenesis(AcquireImageInfo(), args->cmd, args->argc,
-                                      args->argv, NULL, AcquireExceptionInfo());
+  ImageInfo *ii = AcquireImageInfo();
+  ExceptionInfo *ei = AcquireExceptionInfo();
 
+  args->result = MagickCommandGenesis(ii, args->cmd, args->argc,
+                                      args->argv, NULL, ei);
+
+  DestroyImageInfo(ii);
+  DestroyExceptionInfo(ei);
   return NULL;
 }
 
@@ -56,6 +61,7 @@ static int DoSyncCall(eio_req *req) {
   pthread_create(&thread, &attr, &inner_thread, req->data);
   pthread_join(thread, &res);
 
+  pthread_attr_destroy(&attr);
   return 0;
 }
 
