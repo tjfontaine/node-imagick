@@ -2,7 +2,7 @@ import Options
 from os import unlink, symlink, popen
 from os.path import exists 
 
-VERSION = "0.0.2"
+VERSION = "0.0.3"
 
 def set_options(opt):
   opt.tool_options("compiler_cxx")
@@ -13,6 +13,7 @@ def configure(conf):
   conf.check_tool("compiler_cc")
   conf.check_tool("node_addon")
   conf.check_cfg(package="MagickWand", args='--cflags --libs', uselib_store='MAGICKWAND')
+  conf.check_cfg(package="Magick++", args='--cflags --libs', uselib_store='MAGICKPP')
 
 def build(bld):
   obj = bld.new_task_gen("cxx", "shlib", "node_addon")
@@ -21,8 +22,9 @@ def build(bld):
   obj.source = [
     "src/imagick.cc",
     "src/command.cc",
+    "src/image.cc",
   ]
-  obj.uselib = ['MAGICKWAND']
+  obj.uselib = ['MAGICKWAND', 'MAGICKPP']
 
 def shutdown():
   if Options.commands['clean']:
