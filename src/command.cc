@@ -164,6 +164,11 @@ static Handle<Value> Animate(const Arguments& args) {
   return dispatch(args, AnimateImageCommand);
 }
 
+static Handle<Value> Montage(const Arguments& args) {
+  HandleScope scope;
+  return dispatch(args, MontageImageCommand);
+}
+
 extern "C" void
 CommandInit (Handle<Object> target)
 {
@@ -178,6 +183,7 @@ CommandInit (Handle<Object> target)
   NODE_SET_METHOD(target, "Import", Import);
   NODE_SET_METHOD(target, "Display", Display);
   NODE_SET_METHOD(target, "Animate", Animate);
+  NODE_SET_METHOD(target, "Montage", Montage);
   
   NODE_SET_METHOD(target, "mogrify", Mogrify);
   NODE_SET_METHOD(target, "convert", Convert);
@@ -189,4 +195,5 @@ CommandInit (Handle<Object> target)
   NODE_SET_METHOD(target, "import", Import);
   NODE_SET_METHOD(target, "display", Display);
   NODE_SET_METHOD(target, "animate", Animate);
+  NODE_SET_METHOD(target, "montage", Montage);
 }
