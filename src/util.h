@@ -44,4 +44,8 @@ inline const v8::Local<v8::Object> from_blob(const Magick::Blob &blob)
   return actualBuffer;
 }
 
+inline const v8::Handle<v8::Value> throw_exception(const Magick::Exception &ex)
+{
+  return v8::ThrowException(v8::Exception::TypeError(v8::String::New(ex.what())));
+}
 #endif

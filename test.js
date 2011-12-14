@@ -3,10 +3,16 @@ var fs = require('fs');
 
 var i = new imagick.image();
 
-var blob = fs.readFileSync('./wizard.jpg');
+//var blob = fs.readFileSync('./wizard.jpg');
 
-i.readSync(blob).rotate(90)
+i.readSync('./wizard.jpg')
 
-var oblob = i.writeSync();
+i.rotate(90);
+i.despeckle();
+i.flip();
+i.flop();
 
-fs.writeFileSync('./wizard.rotate.jpg', oblob);
+i.writeSync('./wizard.rotate.jpg');
+
+
+//fs.writeFileSync('./wizard.rotate.jpg', oblob);
