@@ -1,7 +1,13 @@
 #ifndef IMAGICK_UTIL_H
 #define IMAGICK_UTIL_H
 
+#include <string.h>
+
 #include <node.h>
+#include <node_buffer.h>
+
+#define IMAGICK_PROTOTYPE(templ, name) NODE_SET_PROTOTYPE_METHOD(templ, #name, name)
+#define IMAGICK_P(name) static v8::Handle<v8::Value> name (const v8::Arguments &args);
 
 template <typename T>
 T _to_string(v8::Handle<v8::String> str)

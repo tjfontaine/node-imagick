@@ -4,6 +4,8 @@
 #include <node.h>
 #include <Magick++.h>
 
+#include "util.h"
+
 #define IMAGICK_VOID_DEFINITION(field) \
 Handle<Value> \
 ImagickImage::field (const Arguments &args) { \
@@ -16,9 +18,6 @@ ImagickImage::field (const Arguments &args) { \
     return throw_exception(error); \
   } \
 }
-
-#define IMAGICK_PROTOTYPE(templ, name) NODE_SET_PROTOTYPE_METHOD(templ, #name, name)
-#define IMAGICK_P(name) static v8::Handle<v8::Value> name(const v8::Arguments &args);
 
 class ImagickImage : public node::ObjectWrap
 {
