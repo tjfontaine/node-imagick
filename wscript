@@ -23,6 +23,8 @@ def build(bld):
     "src/imagick.cc",
     "src/command.cc",
     "src/image.cc",
+    "src/geometry.cc",
+    "src/blob.cc",
   ]
   obj.uselib = ['MAGICKWAND', 'MAGICKPP']
 

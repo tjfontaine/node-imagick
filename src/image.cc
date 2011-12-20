@@ -4,6 +4,8 @@
 
 #include "util.h"
 #include "image.h"
+#include "geometry.h"
+#include "blob.h"
 
 using namespace v8;
 using namespace node;
@@ -50,9 +52,46 @@ ImagickImage::readSync(const Arguments &args)
     {
       image->image_.read(to_string(args[0]));
     }
-    else if(Buffer::HasInstance(args[0]))
+    else if(Buffer::HasInstance(args[0]) || ISB(args[0]))
     {
-      image->image_.read(to_blob(args[0]));
+      Magick::Blob b;//(to_blob(args[0]));
+
+      if (ISB(args[0]))
+      {
+        b = BUNWRAP(args[0]->ToObject())->opaque_;
+      }
+      else
+      {
+        b = to_blob(args[0]);
+      }
+
+      switch (args.Length())
+      {
+        case 1:
+          image->image_.read(b);
+          break;
+        case 2:
+          if (ISG(args[1]))
+          {
+            image->image_.read(b, from_obj(args[1]));
+          }
+          break;
+        case 3:
+          if (ISG(args[1]))
+          {
+            Magick::Geometry g(from_obj(args[1]));
+
+            if(args[2]->IsString())
+            {
+              image->image_.read(b, g, to_string(args[2]));
+            }
+            else if(args[2]->IsNumber())
+            {
+              image->image_.read(b, g, args[2]->Uint32Value());
+            }
+          }
+          break;
+      }
     }
     else
     {
@@ -70,23 +109,45 @@ ImagickImage::writeSync(const Arguments &args)
   HandleScope scope;
   ImagickImage *image = ObjectWrap::Unwrap<ImagickImage>(args.This());
   Local<Value> ret;
+  ImagickBlob *blob;
 
   try
   {
-    if (args.Length() == 0)
+    switch (args.Length())
     {
-      Magick::Blob bl;
-      image->image_.write(&bl);
-      ret = scope.Close(from_blob(bl));
-    }
-    else if(args[0]->IsString())
-    {
-      image->image_.write(to_string(args[0]));
-      ret = args.This();
-    }
-    else
-    {
-      return ThrowException(Exception::TypeError(String::New("Writing to this type not implemented")));
+      case 0:
+        blob = new ImagickBlob();
+        image->image_.write(&blob->opaque_);
+        ret = scope.Close(blob->handle_);
+        break;
+      case 1:
+        if (args[0]->IsString())
+        {
+          image->image_.write(to_string(args[0]));
+          ret = args.This();
+        }
+        else if(ISB(args[0]))
+        {
+          blob = BUNWRAP(args[0]->ToObject());
+          image->image_.write(&blob->opaque_);
+        }
+        break;
+      case 2:
+        if (ISB(args[0]) && args[1]->IsString())
+        {
+          blob = BUNWRAP(args[0]->ToObject());
+          image->image_.write(&blob->opaque_, to_string(args[1]));
+        } 
+        break;
+      case 3:
+        if (ISB(args[0]) && args[1]->IsString() && args[2]->IsNumber())
+        {
+          blob = BUNWRAP(args[1]->ToObject());
+          image->image_.write(&blob->opaque_, to_string(args[1]), args[2]->Uint32Value());
+        }
+      default:
+        return ThrowException(Exception::TypeError(String::New("Writing to this type not implemented")));
+        break;
     }
   } catch (Magick::Error &error) {
     return throw_exception(error);

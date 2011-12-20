@@ -12,7 +12,12 @@ i.despeckle();
 i.flip();
 i.flop();
 
-i.writeSync('./wizard.rotate.jpg');
+var oblob = new imagick.blob();
+console.log("blob length", oblob.length);
+i.writeSync(oblob);
+console.log("blob length after", oblob.length);
+
+fs.writeFileSync('./wizard.rotate.jpg', oblob.toBuffer());
 
 var g = new imagick.geometry("50x50");
 console.log(g.toString());
