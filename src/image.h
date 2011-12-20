@@ -19,6 +19,20 @@ ImagickImage::field (const Arguments &args) { \
   } \
 }
 
+#define IMAGICK_GEOM_DEFINITION(field) \
+Handle<Value> \
+ImagickImage::field (const Arguments &args) { \
+  HandleScope scope; \
+  ImagickImage *image = ObjectWrap::Unwrap<ImagickImage>(args.This()); \
+  ImagickGeometry *geom = GUNWRAP(args[0]->ToObject()); \
+  try { \
+    image->image_.field (geom->opaque_); \
+    return args.This(); \
+  } catch (Magick::Error &error) { \
+    return throw_exception(error); \
+  } \
+}
+
 class ImagickImage : public node::ObjectWrap
 {
 public:
@@ -42,6 +56,15 @@ public:
   IMAGICK_P(modifyImage);
   IMAGICK_P(normalize);
   IMAGICK_P(trim);
+
+  /* Geom Calls */
+  IMAGICK_P(border);
+  IMAGICK_P(chop);
+  IMAGICK_P(crop);
+  IMAGICK_P(sample);
+  IMAGICK_P(scale);
+  IMAGICK_P(shave);
+  IMAGICK_P(zoom);
 };
 
 #endif

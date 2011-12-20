@@ -22,6 +22,14 @@ IMAGICK_VOID_DEFINITION(modifyImage);
 IMAGICK_VOID_DEFINITION(normalize);
 IMAGICK_VOID_DEFINITION(trim);
 
+IMAGICK_GEOM_DEFINITION(border);
+IMAGICK_GEOM_DEFINITION(chop);
+IMAGICK_GEOM_DEFINITION(crop);
+IMAGICK_GEOM_DEFINITION(sample);
+IMAGICK_GEOM_DEFINITION(scale);
+IMAGICK_GEOM_DEFINITION(shave);
+IMAGICK_GEOM_DEFINITION(zoom);
+
 Handle<Value>
 ImagickImage::New(const Arguments &args)
 {
@@ -54,7 +62,7 @@ ImagickImage::readSync(const Arguments &args)
     }
     else if(Buffer::HasInstance(args[0]) || ISB(args[0]))
     {
-      Magick::Blob b;//(to_blob(args[0]));
+      Magick::Blob b;
 
       if (ISB(args[0]))
       {
@@ -194,6 +202,15 @@ ImagickImage::Initialize(Handle<Object> target)
   IMAGICK_PROTOTYPE(t, normalize);
   IMAGICK_PROTOTYPE(t, trim);
 
+  /* Geometry Calls */
+  IMAGICK_PROTOTYPE(t, border);
+  IMAGICK_PROTOTYPE(t, chop);
+  IMAGICK_PROTOTYPE(t, crop);
+  IMAGICK_PROTOTYPE(t, sample);
+  IMAGICK_PROTOTYPE(t, scale);
+  IMAGICK_PROTOTYPE(t, shave);
+  IMAGICK_PROTOTYPE(t, zoom);
+
   NODE_SET_PROTOTYPE_METHOD(t, "adaptiveThreshold", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "addNoise", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "addNoiseChannel", NotImplemented);
@@ -201,18 +218,15 @@ ImagickImage::Initialize(Handle<Object> target)
   NODE_SET_PROTOTYPE_METHOD(t, "annotate", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "blur", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "blurChannel", NotImplemented);
-  NODE_SET_PROTOTYPE_METHOD(t, "border", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "cdl", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "channel", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "charcol", NotImplemented);
-  NODE_SET_PROTOTYPE_METHOD(t, "chop", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "colorize", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "comment", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "compare", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "composite", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "contrast", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "convolve", NotImplemented);
-  NODE_SET_PROTOTYPE_METHOD(t, "crop", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "cycleColormap", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "display", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "distort", NotImplemented);
@@ -253,13 +267,10 @@ ImagickImage::Initialize(Handle<Object> target)
   NODE_SET_PROTOTYPE_METHOD(t, "randomThresholdChannel", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "roll", NotImplemented);
   IMAGICK_PROTOTYPE(t, rotate);
-  NODE_SET_PROTOTYPE_METHOD(t, "sample", NotImplemented);
-  NODE_SET_PROTOTYPE_METHOD(t, "scale", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "segment", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "shade", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "sharpen", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "sharpenChannel", NotImplemented);
-  NODE_SET_PROTOTYPE_METHOD(t, "shave", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "shear", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "solarize", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "splice", NotImplemented);
@@ -277,7 +288,6 @@ ImagickImage::Initialize(Handle<Object> target)
   NODE_SET_PROTOTYPE_METHOD(t, "wave", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "write", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "writeSync", writeSync);
-  NODE_SET_PROTOTYPE_METHOD(t, "zoom", NotImplemented);
   //NODE_SET_PROTOTYPE_METHOD(t, "", NotImplemented);
 
   target->Set(String::NewSymbol("image"), t->GetFunction());
