@@ -10,7 +10,11 @@
 Handle<Value> \
 ImagickImage::field (const Arguments &args) { \
   HandleScope scope; \
-  ImagickImage *image = ObjectWrap::Unwrap<ImagickImage>(args.This()); \
+  if (args.Length() > 0) \
+  { \
+    return v8::ThrowException(v8::Exception::TypeError(v8::String::New(#field" does not take any arguments"))); \
+  } \
+  ImagickImage *image = IUNWRAP(args.This()); \
   try { \
     image->image_.field (); \
     return args.This(); \
@@ -23,7 +27,8 @@ ImagickImage::field (const Arguments &args) { \
 Handle<Value> \
 ImagickImage::field (const Arguments &args) { \
   HandleScope scope; \
-  ImagickImage *image = ObjectWrap::Unwrap<ImagickImage>(args.This()); \
+  ENSURE_INSTANCE(Geometry, 0); \
+  ImagickImage *image = IUNWRAP(args.This()); \
   ImagickGeometry *geom = GUNWRAP(args[0]->ToObject()); \
   try { \
     image->image_.field (geom->opaque_); \
@@ -32,6 +37,8 @@ ImagickImage::field (const Arguments &args) { \
     return throw_exception(error); \
   } \
 }
+
+#define IUNWRAP(arg) ObjectWrap::Unwrap<ImagickImage>(arg)
 
 class ImagickImage : public node::ObjectWrap
 {
@@ -65,6 +72,8 @@ public:
   IMAGICK_P(scale);
   IMAGICK_P(shave);
   IMAGICK_P(zoom);
+
+  IMAGICK_P(adaptiveThreshold);
 };
 
 #endif

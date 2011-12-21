@@ -9,6 +9,8 @@
 #define IMAGICK_PROTOTYPE(templ, name) NODE_SET_PROTOTYPE_METHOD(templ, #name, name)
 #define IMAGICK_P(name) static v8::Handle<v8::Value> name (const v8::Arguments &args);
 
+#define THROW_STRING(message) v8::ThrowException(v8::Exception::TypeError(v8::String::New((message))))
+
 template <typename T>
 T _to_string(v8::Handle<v8::String> str)
 {
@@ -28,7 +30,7 @@ inline const std::string to_string(const v8::Local<v8::Value> &arg)
 
 inline const v8::Handle<v8::Value> throw_exception(const Magick::Exception &ex)
 {
-  return v8::ThrowException(v8::Exception::TypeError(v8::String::New(ex.what())));
+  return THROW_STRING(ex.what());
 }
 
 template <typename T, typename Y>
@@ -37,4 +39,21 @@ Y _from_obj(const v8::Local<v8::Value> &arg)
   T *t = node::ObjectWrap::Unwrap<T>(arg->ToObject());
   return t->opaque_;
 }
+
+#define ENSURE(type, arg) \
+do { \
+  if (!args[arg]->Is ## type()) \
+  { \
+    return THROW_STRING("Argument " #arg  " must be of type " #type); \
+  } \
+} while(0)
+
+#define ENSURE_INSTANCE(type, arg) \
+do { \
+  if (!Imagick ## type::Klass->HasInstance(args[arg]->ToObject())) \
+  { \
+    return THROW_STRING("Argument " #arg  " must be of type " #type); \
+  } \
+} while(0)
+
 #endif

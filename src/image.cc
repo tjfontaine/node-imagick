@@ -103,7 +103,7 @@ ImagickImage::readSync(const Arguments &args)
     }
     else
     {
-      return ThrowException(Exception::TypeError(String::New("Reading from this type not implemented")));
+      return THROW_STRING("Reading from this type not implemented");
     }
       return args.This();
   } catch (Magick::Error &error) {
@@ -139,22 +139,25 @@ ImagickImage::writeSync(const Arguments &args)
           blob = BUNWRAP(args[0]->ToObject());
           image->image_.write(&blob->opaque_);
         }
+        else
+        {
+          return THROW_STRING("Argument must be either string or blob");
+        }
         break;
       case 2:
-        if (ISB(args[0]) && args[1]->IsString())
-        {
-          blob = BUNWRAP(args[0]->ToObject());
-          image->image_.write(&blob->opaque_, to_string(args[1]));
-        } 
+        ENSURE_INSTANCE(Blob, 0);
+        ENSURE(String, 1);
+        blob = BUNWRAP(args[0]->ToObject());
+        image->image_.write(&blob->opaque_, to_string(args[1]));
         break;
       case 3:
-        if (ISB(args[0]) && args[1]->IsString() && args[2]->IsNumber())
-        {
-          blob = BUNWRAP(args[1]->ToObject());
-          image->image_.write(&blob->opaque_, to_string(args[1]), args[2]->Uint32Value());
-        }
+        ENSURE_INSTANCE(Blob, 0);
+        ENSURE(String, 1);
+        ENSURE(Number, 2);
+        blob = BUNWRAP(args[1]->ToObject());
+        image->image_.write(&blob->opaque_, to_string(args[1]), args[2]->Uint32Value());
       default:
-        return ThrowException(Exception::TypeError(String::New("Writing to this type not implemented")));
+        return THROW_STRING("Writing to this type not implemented");
         break;
     }
   } catch (Magick::Error &error) {
@@ -169,17 +172,46 @@ ImagickImage::rotate(const Arguments &args)
 {
   HandleScope scope;
   ImagickImage *image = ObjectWrap::Unwrap<ImagickImage>(args.This());
+  ENSURE(Number, 0);
 
   try
   {
-  if(args[0]->IsNumber())
-  {
     image->image_.rotate(args[0]->NumberValue());
-  }
-    return args.This();
   } catch (Magick::Error &error) {
     return throw_exception(error);
   }
+
+  return args.This();
+}
+
+Handle<Value>
+ImagickImage::adaptiveThreshold(const Arguments &args)
+{
+  HandleScope scope;
+  ENSURE(Number, 0);
+  ENSURE(Number, 1);
+  ImagickImage *image = IUNWRAP(args.This());
+
+  try
+  {
+    switch (args.Length())
+    {
+      case 2:
+        image->image_.adaptiveThreshold(args[0]->Uint32Value(), args[1]->Uint32Value());
+        break;
+      case 3:
+        ENSURE(Number, 2);
+        image->image_.adaptiveThreshold(args[0]->Uint32Value(), args[1]->Uint32Value(), args[2]->Uint32Value());
+        break;
+      default:
+        return THROW_STRING("adaptiveThreshold only takes 2 or 3 arguments");
+        break;
+    }
+  } catch (Magick::Error &error) {
+    return throw_exception(error);
+  }
+
+  return args.This();
 }
 
 void
@@ -211,7 +243,7 @@ ImagickImage::Initialize(Handle<Object> target)
   IMAGICK_PROTOTYPE(t, shave);
   IMAGICK_PROTOTYPE(t, zoom);
 
-  NODE_SET_PROTOTYPE_METHOD(t, "adaptiveThreshold", NotImplemented);
+  IMAGICK_PROTOTYPE(t, adaptiveThreshold);
   NODE_SET_PROTOTYPE_METHOD(t, "addNoise", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "addNoiseChannel", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "affineTransform", NotImplemented);

@@ -22,6 +22,8 @@ console.log(g.toString());
 
 i.zoom(g);
 
+i.adaptiveThreshold(75, 100);
+
 var oblob = new imagick.blob();
 console.log("blob length", oblob.length);
 i.writeSync(oblob);
