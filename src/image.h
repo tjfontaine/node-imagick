@@ -78,6 +78,10 @@ public:
   IMAGICK_P(addNoiseChannel);
   IMAGICK_P(blur);
   IMAGICK_P(blurChannel);
+  IMAGICK_P(cdl);
+  IMAGICK_P(channel);
+  IMAGICK_P(charcoal);
+  IMAGICK_P(comment);
 };
 
 #endif

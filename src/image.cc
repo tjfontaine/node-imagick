@@ -258,6 +258,47 @@ ImagickImage::blurChannel(const Arguments &args)
   return args.This();
 }
 
+Handle<Value>
+ImagickImage::cdl(const Arguments &args)
+{
+  HandleScope scope;
+  ENSURE(String, 0);
+  ImagickImage *image = IUNWRAP(args.This());
+  TRY_CATCH(image->image_.cdl(to_string(args[0])));
+  return args.This();
+}
+
+Handle<Value>
+ImagickImage::channel(const Arguments &args)
+{
+  HandleScope scope;
+  ENSURE(Number, 0);
+  ImagickImage *image = IUNWRAP(args.This());
+  TRY_CATCH(image->image_.channel((MagickCore::ChannelType)args[0]->Uint32Value()));
+  return args.This();
+}
+
+Handle<Value>
+ImagickImage::charcoal(const Arguments &args)
+{
+  HandleScope scope;
+  ENSURE(Number, 0);
+  ENSURE(Number, 1);
+  ImagickImage *image = IUNWRAP(args.This());
+  TRY_CATCH(image->image_.charcoal(args[0]->NumberValue(), args[1]->NumberValue()));
+  return args.This();
+}
+
+Handle<Value>
+ImagickImage::comment(const Arguments &args)
+{
+  HandleScope scope;
+  ENSURE(String, 0);
+  ImagickImage *image = IUNWRAP(args.This());
+  TRY_CATCH(image->image_.comment(to_string(args[0])));
+  return args.This();
+}
+
 void
 ImagickImage::Initialize(Handle<Object> target)
 {
@@ -292,14 +333,14 @@ ImagickImage::Initialize(Handle<Object> target)
   IMAGICK_PROTOTYPE(t, addNoiseChannel);
   IMAGICK_PROTOTYPE(t, blur);
   IMAGICK_PROTOTYPE(t, blurChannel);
+  IMAGICK_PROTOTYPE(t, cdl);
+  IMAGICK_PROTOTYPE(t, channel);
+  IMAGICK_PROTOTYPE(t, charcoal);
+  IMAGICK_PROTOTYPE(t, comment);
 
   NODE_SET_PROTOTYPE_METHOD(t, "affineTransform", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "annotate", NotImplemented);
-  NODE_SET_PROTOTYPE_METHOD(t, "cdl", NotImplemented);
-  NODE_SET_PROTOTYPE_METHOD(t, "channel", NotImplemented);
-  NODE_SET_PROTOTYPE_METHOD(t, "charcol", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "colorize", NotImplemented);
-  NODE_SET_PROTOTYPE_METHOD(t, "comment", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "compare", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "composite", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "contrast", NotImplemented);
