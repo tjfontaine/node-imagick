@@ -57,3 +57,12 @@ do { \
 } while(0)
 
 #endif
+
+#define TRY_CATCH(stmt) \
+do { \
+  try {\
+    stmt; \
+  } catch (Magick::Error &error) { \
+    return throw_exception(error); \
+  } \
+} while (0)

@@ -74,6 +74,10 @@ public:
   IMAGICK_P(zoom);
 
   IMAGICK_P(adaptiveThreshold);
+  IMAGICK_P(addNoise);
+  IMAGICK_P(addNoiseChannel);
+  IMAGICK_P(blur);
+  IMAGICK_P(blurChannel);
 };
 
 #endif

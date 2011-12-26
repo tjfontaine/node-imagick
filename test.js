@@ -12,6 +12,14 @@ i.despeckle();
 i.flip();
 i.flop();
 
+i.adaptiveThreshold(75, 100);
+
+i.addNoise(imagick.UniformNoise);
+i.addNoiseChannel(imagick.BlueChannel, imagick.GaussianNoise);
+
+i.blur(1, .5);
+i.blurChannel(imagick.MagentaChannel, 1, .5);
+
 var g = new imagick.geometry("50x50");
 console.log(g.toString());
 console.log('width', g.width);
@@ -22,7 +30,6 @@ console.log(g.toString());
 
 i.zoom(g);
 
-i.adaptiveThreshold(75, 100);
 
 var oblob = new imagick.blob();
 console.log("blob length", oblob.length);

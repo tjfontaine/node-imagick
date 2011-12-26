@@ -214,6 +214,50 @@ ImagickImage::adaptiveThreshold(const Arguments &args)
   return args.This();
 }
 
+Handle<Value>
+ImagickImage::addNoise(const Arguments &args)
+{
+  HandleScope scope;
+  ENSURE(Number, 0);
+  ImagickImage *image = IUNWRAP(args.This());
+  TRY_CATCH(image->image_.addNoise((MagickCore::NoiseType)args[0]->Uint32Value()));
+  return args.This();
+}
+
+Handle<Value>
+ImagickImage::addNoiseChannel(const Arguments &args)
+{
+  HandleScope scope;
+  ENSURE(Number, 0);
+  ENSURE(Number, 1);
+  ImagickImage *image = IUNWRAP(args.This());
+  TRY_CATCH(image->image_.addNoiseChannel((MagickCore::ChannelType)args[0]->Uint32Value(), (MagickCore::NoiseType)args[1]->Uint32Value()));
+  return args.This();
+}
+
+Handle<Value>
+ImagickImage::blur(const Arguments &args)
+{
+  HandleScope scope;
+  ENSURE(Number, 0);
+  ENSURE(Number, 1);
+  ImagickImage *image = IUNWRAP(args.This());
+  TRY_CATCH(image->image_.blur(args[0]->NumberValue(), args[1]->NumberValue()));
+  return args.This();
+}
+
+Handle<Value>
+ImagickImage::blurChannel(const Arguments &args)
+{
+  HandleScope scope;
+  ENSURE(Number, 0);
+  ENSURE(Number, 1);
+  ENSURE(Number, 2);
+  ImagickImage *image = IUNWRAP(args.This());
+  TRY_CATCH(image->image_.blurChannel((MagickCore::ChannelType)args[0]->Uint32Value(), args[1]->NumberValue(), args[2]->NumberValue()));
+  return args.This();
+}
+
 void
 ImagickImage::Initialize(Handle<Object> target)
 {
@@ -244,12 +288,13 @@ ImagickImage::Initialize(Handle<Object> target)
   IMAGICK_PROTOTYPE(t, zoom);
 
   IMAGICK_PROTOTYPE(t, adaptiveThreshold);
-  NODE_SET_PROTOTYPE_METHOD(t, "addNoise", NotImplemented);
-  NODE_SET_PROTOTYPE_METHOD(t, "addNoiseChannel", NotImplemented);
+  IMAGICK_PROTOTYPE(t, addNoise);
+  IMAGICK_PROTOTYPE(t, addNoiseChannel);
+  IMAGICK_PROTOTYPE(t, blur);
+  IMAGICK_PROTOTYPE(t, blurChannel);
+
   NODE_SET_PROTOTYPE_METHOD(t, "affineTransform", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "annotate", NotImplemented);
-  NODE_SET_PROTOTYPE_METHOD(t, "blur", NotImplemented);
-  NODE_SET_PROTOTYPE_METHOD(t, "blurChannel", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "cdl", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "channel", NotImplemented);
   NODE_SET_PROTOTYPE_METHOD(t, "charcol", NotImplemented);
