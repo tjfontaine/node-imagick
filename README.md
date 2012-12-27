@@ -30,7 +30,8 @@ and get the response. If there is an error the exception will be in error.
 Some commands will merely continue to spew on your console unless you tweak the
 command line parameters not to.
 
-== Why use this instead of node-imagemagick ==
+Why use this instead of node-imagemagick
+========================================
 
 The main reason for this library to exist is such that you're not spawn'ing a new
 process for every command you need to run. You'll only need to instantiate the
@@ -47,7 +48,8 @@ This test is fast because of the builtin caching that ImageMagick does,
 if you spawn a new process for each command you eliminate the usefulness of
 that cache.
 
-== Why would you not want to use node-imagick ==
+Why not to use this
+===================
 
 Using node-imagemagick spawns a new process per command, which means the operating system
 is handling the scheduling, and it's much more likely you'll spread your work
