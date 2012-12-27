@@ -1,6 +1,6 @@
 {
   "name": "imagick",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "imagick.js",
   "description": "Native bindings to ImageMagick",
   "keywords": ["ImageMagick", "png", "jpeg", "image"],

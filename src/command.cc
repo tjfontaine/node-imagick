@@ -10,15 +10,71 @@
 using namespace v8;
 using namespace node;
 
-static ImageInfo *image_info;
-static ExceptionInfo *exception_info;
+struct command_args {
+  ImageInfo *ii;
+  ExceptionInfo *ei;
+  Persistent<Function> cb;
+  MagickCommand cmd;
+  int argc;
+  char **argv;
+  char *error;
+  char *metadata;
+  int result;
+};
+
+static void command_args_free(command_args *args) {
+  int i;
+
+  for (i = 0; i < args->argc; i++) {
+    free(args->argv[i]);
+  }
+
+  if (args->metadata != NULL)
+    DestroyString(args->metadata);
+
+  DestroyImageInfo(args->ii);
+  DestroyExceptionInfo(args->ei);
+
+  delete args;
+};
+
+static void DoSyncCall(uv_work_t *req) {
+  command_args *args = (command_args *)req->data;
+  args->result = args->cmd(args->ii, args->argc, args->argv, &args->metadata, args->ei);
+}
+
+static void DoSyncCall_After(uv_work_t *req) {
+  command_args *args = (command_args *)req->data;
+
+  Local<Value> cb_argv[2];
+
+  cb_argv[0] = Local<Value>::New(Undefined());
+  if (args->ei->reason != NULL)
+    cb_argv[0] = String::New(args->ei->reason);
+
+  cb_argv[1] = Local<Value>::New(Undefined());
+  if (args->metadata != NULL)
+    cb_argv[1] = String::New(args->metadata);
+
+  TryCatch try_catch;
+
+  args->cb->Call(Context::GetCurrent()->Global(), 2, cb_argv);
+
+
+  args->cb.Dispose();
+
+  command_args_free(args);
+  delete req;
+
+  if(try_catch.HasCaught()) {
+    FatalException(try_catch);
+  }
+}
 
 static Handle<Value> dispatch(const Arguments& args, MagickCommand cmd, const char *command) {
   HandleScope scope;
 
   Local<Array> argv_handle = Local<Array>::Cast(args[0]);
-
-  Local<Function> cb = Local<Function>::Cast(args[1]);
 
   int argc = argv_handle->Length();
   char **argv;
@@ -36,37 +92,19 @@ static Handle<Value> dispatch(const Arguments& args, MagickCommand cmd, const ch
     argv[i + 1] = strdup(*arg);
   }
 
-  GetExceptionInfo(exception_info);
-  GetImageInfo(image_info);
+  command_args *async_args = new command_args;
+  async_args->ii = AcquireImageInfo();
+  async_args->ei = AcquireExceptionInfo();
+  async_args->cmd = cmd;
+  async_args->argc = argv_length;
+  async_args->argv = argv;
+  async_args->metadata = NULL;
+  async_args->cb = Persistent<Function>::New(Local<Function>::Cast(args[1]));
 
-  char *metadata = NULL;
+  uv_work_t *req = new uv_work_t;
+  req->data = async_args;
 
-  MagickBooleanType result = cmd(image_info, argv_length, argv, &metadata, exception_info);
-
-  Local<Value> cb_argv[2];
-
-  cb_argv[0] = Local<Value>::New(Undefined());
-  if (exception_info->reason != NULL)
-    cb_argv[0] = String::New(exception_info->reason);
-
-  cb_argv[1] = Local<Value>::New(Undefined());
-  if (metadata != NULL)
-    cb_argv[1] = String::New(metadata);
-
-  if (metadata != NULL)
-    DestroyString(metadata);
-
-  for (i = 0; i < argv_length; i++) {
-    free(argv[i]);
-  }
-
-  TryCatch try_catch;
-
-  cb->Call(Context::GetCurrent()->Global(), 2, cb_argv);
-
-  if(try_catch.HasCaught()) {
-    FatalException(try_catch);
-  }
+  uv_queue_work(uv_default_loop(), req, DoSyncCall, DoSyncCall_After);
 
   return Undefined();
 }
@@ -154,8 +192,5 @@ CommandInit (Handle<Object> target)
   NODE_SET_METHOD(target, "animate", Animate);
   NODE_SET_METHOD(target, "montage", Montage);
 
-  MagickCoreGenesis("/dev/null", MagickTrue);
-
-  image_info = AcquireImageInfo();
-  exception_info = AcquireExceptionInfo();
+  MagickCoreGenesis(NULL, MagickTrue);
 }
