@@ -1,7 +1,7 @@
 {
   "name": "imagick",
-  "version": "0.0.3",
-  "main": "imagick",
+  "version": "0.0.4",
+  "main": "imagick.js",
   "description": "Native bindings to ImageMagick",
   "keywords": ["ImageMagick", "png", "jpeg", "image"],
   "author": "Timothy J Fontaine <tjfontaine@gmail.com>"

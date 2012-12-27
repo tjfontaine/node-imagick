@@ -1,5 +1,4 @@
 #include <node.h>
-#include <node_events.h>
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
@@ -11,162 +10,120 @@
 using namespace v8;
 using namespace node;
 
-struct command_args {
-  Persistent<Function> cb;
-  MagickCommand cmd;
-  MagickBooleanType result;
-  int argc;
-  char **argv;
-};
+static ImageInfo *image_info;
+static ExceptionInfo *exception_info;
 
-static void command_args_free (struct command_args *args) {
-  int i;
-  if (args != NULL) {
-    args->cb.Dispose();
-
-    for (i = 0; i < args->argc; i++) {
-      if (args->argv[i] != NULL) {
-        free(args->argv[i]);
-        args->argv[i] = NULL;
-      }
-    }
-
-    delete args->argv;
-
-    free(args);
-  }
-}
-
-static void *inner_thread (void *data) {
-  struct command_args *args = (struct command_args *)data;
-  ImageInfo *ii = AcquireImageInfo();
-  ExceptionInfo *ei = AcquireExceptionInfo();
-
-  args->result = MagickCommandGenesis(ii, args->cmd, args->argc,
-                                      args->argv, NULL, ei);
-
-  DestroyImageInfo(ii);
-  DestroyExceptionInfo(ei);
-  return NULL;
-}
-
-static int DoSyncCall(eio_req *req) {
-  void *res;
-  pthread_attr_t attr;
-  pthread_attr_init(&attr);
-  pthread_attr_setstacksize(&attr, 8192);
-
-  pthread_t thread;
-
-  pthread_create(&thread, &attr, &inner_thread, req->data);
-  pthread_join(thread, &res);
-
-  pthread_attr_destroy(&attr);
-  return 0;
-}
-
-static int DoSyncCall_After(eio_req *req) {
+static Handle<Value> dispatch(const Arguments& args, MagickCommand cmd, const char *command) {
   HandleScope scope;
-  ev_unref(EV_DEFAULT_UC);
-  struct command_args *args = (struct command_args *)req->data;
 
-  Local<Value> argv[1];
-  argv[0] = Integer::New(args->result);
+  Local<Array> argv_handle = Local<Array>::Cast(args[0]);
+
+  Local<Function> cb = Local<Function>::Cast(args[1]);
+
+  int argc = argv_handle->Length();
+  char **argv;
+
+  int argv_length = argc + 1;
+
+  argv = new char*[argv_length]; // heap allocated to detect errors
+
+  int i;
+
+  argv[0] = strdup(command);
+
+  for (i = 0; i < argc; i++) {
+    String::Utf8Value arg(argv_handle->Get(Integer::New(i))->ToString());
+    argv[i + 1] = strdup(*arg);
+  }
+
+  GetExceptionInfo(exception_info);
+  GetImageInfo(image_info);
+
+  char *metadata = NULL;
+
+  MagickBooleanType result = cmd(image_info, argv_length, argv, &metadata, exception_info);
+
+  Local<Value> cb_argv[2];
+
+  cb_argv[0] = Local<Value>::New(Undefined());
+  if (exception_info->reason != NULL)
+    cb_argv[0] = String::New(exception_info->reason);
+
+  cb_argv[1] = Local<Value>::New(Undefined());
+  if (metadata != NULL)
+    cb_argv[1] = String::New(metadata);
+
+  if (metadata != NULL)
+    DestroyString(metadata);
+
+  for (i = 0; i < argv_length; i++) {
+    free(argv[i]);
+  }
 
   TryCatch try_catch;
 
-  args->cb->Call(Context::GetCurrent()->Global(), 1, argv);
+  cb->Call(Context::GetCurrent()->Global(), 2, cb_argv);
 
   if(try_catch.HasCaught()) {
     FatalException(try_catch);
   }
-
-  command_args_free(args);
-
-  return 0;
-}
-
-static Handle<Value> dispatch(const Arguments& args, MagickCommand cmd) {
-  HandleScope scope;
-
-  command_args *async_args = (command_args *)malloc(sizeof (struct command_args));
-
-  Local<Array> argv_handle = Local<Array>::Cast(args[0]);
-
-  async_args->cb = Persistent<Function>::New(Local<Function>::Cast(args[1]));
-  async_args->argc = argv_handle->Length();
-  async_args->cmd = cmd;
-
-  int argv_length = async_args->argc + 1 + 1;
-
-  async_args->argv = new char*[argv_length]; // heap allocated to detect errors
-
-  int i;
-
-  for (i = 0; i < async_args->argc; i++) {
-    String::Utf8Value arg(argv_handle->Get(Integer::New(i))->ToString());
-    async_args->argv[i] = strdup(*arg);
-  }
-
-  eio_custom(DoSyncCall, EIO_PRI_DEFAULT, DoSyncCall_After, async_args);  
-  ev_ref(EV_DEFAULT_UC);
 
   return Undefined();
 }
 
 static Handle<Value> Mogrify(const Arguments& args) {
   HandleScope scope;
-  return dispatch(args, MogrifyImageCommand);
+  return dispatch(args, MogrifyImageCommand, "mogrify");
 }
 
 static Handle<Value> Convert(const Arguments& args) {
   HandleScope scope;
-  return dispatch(args, ConvertImageCommand);
+  return dispatch(args, ConvertImageCommand, "convert");
 }
 
 static Handle<Value> Composite(const Arguments& args) {
   HandleScope scope;
-  return dispatch(args, CompositeImageCommand);
+  return dispatch(args, CompositeImageCommand, "composite");
 }
 
 static Handle<Value> Identify(const Arguments& args) {
   HandleScope scope;
-  return dispatch(args, IdentifyImageCommand);
+  return dispatch(args, IdentifyImageCommand, "identify");
 }
 
 static Handle<Value> Compare(const Arguments& args) {
   HandleScope scope;
-  return dispatch(args, CompareImageCommand);
+  return dispatch(args, CompareImageCommand, "compare");
 }
 
 static Handle<Value> Conjure(const Arguments& args) {
   HandleScope scope;
-  return dispatch(args, ConjureImageCommand);
+  return dispatch(args, ConjureImageCommand, "conjure");
 }
 
 static Handle<Value> Stream(const Arguments& args) {
   HandleScope scope;
-  return dispatch(args, StreamImageCommand);
+  return dispatch(args, StreamImageCommand, "stream");
 }
 
 static Handle<Value> Import(const Arguments& args) {
   HandleScope scope;
-  return dispatch(args, ImportImageCommand);
+  return dispatch(args, ImportImageCommand, "import");
 }
 
 static Handle<Value> Display(const Arguments& args) {
   HandleScope scope;
-  return dispatch(args, DisplayImageCommand);
+  return dispatch(args, DisplayImageCommand, "display");
 }
 
 static Handle<Value> Animate(const Arguments& args) {
   HandleScope scope;
-  return dispatch(args, AnimateImageCommand);
+  return dispatch(args, AnimateImageCommand, "animate");
 }
 
 static Handle<Value> Montage(const Arguments& args) {
   HandleScope scope;
-  return dispatch(args, MontageImageCommand);
+  return dispatch(args, MontageImageCommand, "montage");
 }
 
 extern "C" void
@@ -196,4 +153,9 @@ CommandInit (Handle<Object> target)
   NODE_SET_METHOD(target, "display", Display);
   NODE_SET_METHOD(target, "animate", Animate);
   NODE_SET_METHOD(target, "montage", Montage);
+
+  MagickCoreGenesis("/dev/null", MagickTrue);
+
+  image_info = AcquireImageInfo();
+  exception_info = AcquireExceptionInfo();
 }

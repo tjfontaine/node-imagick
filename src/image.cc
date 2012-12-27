@@ -409,4 +409,55 @@ ImagickImage::Initialize(Handle<Object> target)
   //NODE_SET_PROTOTYPE_METHOD(t, "", NotImplemented);
 
   target->Set(String::NewSymbol("image"), t->GetFunction());
+
+  /*
+  Local<Object> obj = Object::New();
+  #define X(name) obj->Set(String::NewSymbol(#name), Number::New(image_info->name))
+  X(compression);
+  X(orientation);
+  X(temporary);
+  X(adjoin);
+  X(affirm);
+  X(antialias);
+  X(scene);
+  X(number_scenes);
+  X(depth);
+  X(interlace);
+  X(endian);
+  X(units);
+  X(quality);
+  X(pointsize);
+  X(fuzz);
+  X(dither);
+  X(monochrome);
+  X(colors);
+  X(colorspace);
+  X(type);
+  X(preview_type);
+  X(group);
+  X(ping);
+  X(verbose);
+  X(channel);
+  X(length);
+  X(signature);
+  #undef X
+  #define X(name) \
+    if (image_info->name != NULL) \
+      obj->Set(String::NewSymbol(#name), String::New(image_info->name)); \
+    else \
+      obj->Set(String::NewSymbol(#name), Undefined());
+  X(size);
+  X(extract);
+  X(page);
+  X(scenes);
+  X(sampling_factor);
+  X(server_name);
+  X(font);
+  X(texture);
+  X(density);
+  X(view);
+  X(authenticate);
+  #undef X
+  cb_argv[3] = obj;
+  */
 }
