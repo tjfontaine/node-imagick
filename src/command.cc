@@ -17,7 +17,6 @@ struct command_args {
   MagickCommand cmd;
   int argc;
   char **argv;
-  char *error;
   char *metadata;
   int result;
 };
@@ -48,7 +47,7 @@ static void DoSyncCall_After(uv_work_t *req) {
 
   Local<Value> cb_argv[2];
 
-  cb_argv[0] = Local<Value>::New(Undefined());
+  cb_argv[0] = Local<Value>::New(Boolean::New(args->result));
   if (args->ei->reason != NULL)
     cb_argv[0] = String::New(args->ei->reason);
 
