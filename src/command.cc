@@ -1,4 +1,6 @@
 #include <node.h>
+#include <uv.h>
+
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
@@ -42,7 +44,7 @@ static void DoSyncCall(uv_work_t *req) {
   args->result = args->cmd(args->ii, args->argc, args->argv, &args->metadata, args->ei);
 }
 
-static void DoSyncCall_After(uv_work_t *req) {
+static void DoSyncCall_After(uv_work_t *req, int status) {
   command_args *args = (command_args *)req->data;
 
   Local<Value> cb_argv[2];

@@ -22,3 +22,5 @@ init (Handle<Object> target)
   //ImagickGeometry::Initialize(target);
   //ImagickBlob::Initialize(target);
 }
+
+NODE_MODULE(imagick, init)
