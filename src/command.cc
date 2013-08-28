@@ -45,6 +45,8 @@ static void DoSyncCall(uv_work_t *req) {
 }
 
 static void DoSyncCall_After(uv_work_t *req, int status) {
+  HandleScope scope;
+
   command_args *args = (command_args *)req->data;
 
   Local<Value> cb_argv[2];
@@ -60,7 +62,6 @@ static void DoSyncCall_After(uv_work_t *req, int status) {
   TryCatch try_catch;
 
   args->cb->Call(Context::GetCurrent()->Global(), 2, cb_argv);
-
 
   args->cb.Dispose();
 
@@ -130,9 +131,12 @@ static Handle<Value> Identify(const Arguments& args) {
   return dispatch(args, IdentifyImageCommand, "identify");
 }
 
+extern "C" WandExport MagickBooleanType TJCompareImageCommand(
+  ImageInfo *, int, char **, char **, ExceptionInfo *);
+
 static Handle<Value> Compare(const Arguments& args) {
   HandleScope scope;
-  return dispatch(args, CompareImageCommand, "compare");
+  return dispatch(args, TJCompareImageCommand, "compare");
 }
 
 static Handle<Value> Conjure(const Arguments& args) {
@@ -193,5 +197,5 @@ CommandInit (Handle<Object> target)
   NODE_SET_METHOD(target, "animate", Animate);
   NODE_SET_METHOD(target, "montage", Montage);
 
-  MagickCoreGenesis(NULL, MagickTrue);
+  MagickCoreGenesis("/tmp", MagickFalse);
 }

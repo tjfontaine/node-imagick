@@ -9,10 +9,12 @@
       'sources': [
         'src/imagick.cc',
         'src/command.cc',
+        'src/compare.c',
         #'src/image.cc',
         #'src/geometry.cc',
         #'src/blob.cc',
       ],
+      'include_dirs': [ 'include' ],
       'cflags': [
         '<!@(<(wand-config) --cppflags)',
         #'<!@(<(mpp-config) --cppflags)',
