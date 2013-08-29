@@ -55,9 +55,10 @@ static void DoSyncCall_After(uv_work_t *req, int status) {
   if (args->ei->reason != NULL)
     cb_argv[0] = String::New(args->ei->reason);
 
-  cb_argv[1] = Local<Value>::New(Undefined());
   if (args->metadata != NULL)
     cb_argv[1] = String::New(args->metadata);
+  else
+    cb_argv[1] = Local<Value>::New(Undefined());
 
   TryCatch try_catch;
 

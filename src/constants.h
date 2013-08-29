@@ -1,9 +1,10 @@
 #include <node.h>
-#include <Magick++.h>
 
 void
 ConstantsInitialize(v8::Handle<v8::Object> target)
 {
+/*
+#include <Magick++.h>
   using namespace Magick;
 
   NODE_DEFINE_CONSTANT(target, UniformNoise);
@@ -23,4 +24,5 @@ ConstantsInitialize(v8::Handle<v8::Object> target)
   NODE_DEFINE_CONSTANT(target, OpacityChannel);
   NODE_DEFINE_CONSTANT(target, BlackChannel);
   NODE_DEFINE_CONSTANT(target, MatteChannel);
+*/
 }
