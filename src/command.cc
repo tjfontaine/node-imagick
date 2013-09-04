@@ -30,6 +30,8 @@ static void command_args_free(command_args *args) {
     free(args->argv[i]);
   }
 
+  delete args->argv;
+
   if (args->metadata != NULL)
     DestroyString(args->metadata);
 
