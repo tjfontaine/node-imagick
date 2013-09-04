@@ -77,8 +77,6 @@ static void DoSyncCall_After(uv_work_t *req, int status) {
 }
 
 static Handle<Value> dispatch(const Arguments& args, MagickCommand cmd, const char *command) {
-  HandleScope scope;
-
   Local<Array> argv_handle = Local<Array>::Cast(args[0]);
 
   int argc = argv_handle->Length();
