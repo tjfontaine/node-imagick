@@ -76,6 +76,11 @@ static void DoSyncCall_After(uv_work_t *req, int status) {
   }
 }
 
+// Node 0.8.x
+static void DoSyncCall_After(uv_work_t *req) {
+  DoSyncCall_After(req, 0);
+}
+
 static Handle<Value> dispatch(const Arguments& args, MagickCommand cmd, const char *command) {
   Local<Array> argv_handle = Local<Array>::Cast(args[0]);
 
