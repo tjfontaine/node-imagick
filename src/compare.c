@@ -37,7 +37,7 @@
 %  difference between an image and its reconstruction.
 %
 */
-
+
 /*
   Include declarations.
 */
@@ -45,7 +45,14 @@
 #include "wand/MagickWand.h"
 #include "wand/mogrify-private.h"
 #include "magick/string-private.h"
-
+
+
+/*
+  Compatible with older ImageMagick version
+*/
+extern MagickExport void
+  ListMagickVersion(FILE *);
+
 /*
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                             %
